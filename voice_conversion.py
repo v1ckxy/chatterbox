@@ -2,7 +2,6 @@ from tqdm import tqdm
 import sys
 import torch
 import shutil
-import perth
 from pathlib import Path
 import argparse
 import os
@@ -55,8 +54,7 @@ def main():
     ref_24, _ = librosa.load(args.target_speaker, sr=S3GEN_SR, duration=10)
     ref_24 = torch.tensor(ref_24).float()
     shutil.copy(args.target_speaker, ref_folder / Path(args.target_speaker).name)
-    if not args.no_watermark:
-        watermarker = perth.PerthImplicitWatermarker()
+
     for wav_fpath in tqdm(wav_fpaths):
         shutil.copy(wav_fpath, output_orig_folder / wav_fpath.name)
 
@@ -66,8 +64,7 @@ def main():
 
         wav = s3gen(s3_tokens.to(device), ref_24, S3GEN_SR)
         wav = wav.view(-1).cpu().numpy()
-        if not args.no_watermark:
-            wav = watermarker.apply_watermark(wav, sample_rate=S3GEN_SR)
+
         save_path = output_vc_folder / wav_fpath.name
         sf.write(str(save_path), wav, samplerate=S3GEN_SR)
 
